@@ -11,6 +11,10 @@ require('dotenv').config({
 const express = require('express');
 const app = express();
 
+app.get('/', async (req,res) => {
+    res.send('welcome to auth micro!\n');
+});
+
 
 const server = app.listen(
     process.env.PORT||DEFAULT_PORT, () => {
