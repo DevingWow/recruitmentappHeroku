@@ -1,5 +1,6 @@
 const path = require('path');
 const APP_ROOT_DIR = path.join(__dirname, '..');
+const db = require("./integration/dbconfig");
 
 const DEFAULT_PORT = '8000';
 
@@ -10,6 +11,8 @@ require('dotenv').config({
 
 const express = require('express');
 const app = express();
+
+db.authenticate().then(e => console.log("db connected!")).catch(err => console.error(err));
 
 app.get('/', async (req,res) => {
     res.send('welcome to auth micro!\n');
