@@ -11,7 +11,7 @@ router.post("/", async (req, res, next) => {
         const user = await controller.loginUser(username, password);
         if (user && user.password){
             cookiehandler.sendAuthCookie(user, res);
-            res.send({login_status: 'success'});
+            res.send({login_status: 'success', username: user.username, name: user.name});
         }
         else {
             res.send({login_status: 'fail'});

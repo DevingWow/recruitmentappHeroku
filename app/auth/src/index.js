@@ -24,13 +24,8 @@ app.use(routes);
 
 db.authenticate().then(e => console.log("db connected!")).catch(err => console.error(err));
 
-app.get('/', async (req,res) => {
-    res.send('welcome to auth micro!\n');
-});
-
-
 const server = app.listen(
     process.env.PORT||DEFAULT_PORT, () => {
         console.log('Server is up');
     }
-)
+);

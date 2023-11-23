@@ -2,7 +2,7 @@ const authModule = require('../../util/cookiehandler')
 const controller = require('../../controller/Controller');
 
 console.log(authModule);
-
+console.log(controller);
 // check if the client who request is comming from is logged in
 // if user is logged in it sets req.auth to true else false
 // It is important this middleware is used before any routers!

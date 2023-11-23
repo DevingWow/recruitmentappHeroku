@@ -34,6 +34,7 @@ const checkAuth = async (contr, req, res) => {
         console.log(jwtUserPayload);
         //Implement function which calls controller for a database check for user if user is logged
         const userLoggedIn = await contr.getUserById(jwtUserPayload.person_id); // until above is implemented we assume user not logged in 
+        console.log(userLoggedIn);
         if (!userLoggedIn){
             res.clearCookie('auth');
             return null;
@@ -42,6 +43,7 @@ const checkAuth = async (contr, req, res) => {
     } catch (error) {
         //if verification or controller call failed
         res.clearCookie('auth');
+        console.log(error)
         return null;
     }
 }

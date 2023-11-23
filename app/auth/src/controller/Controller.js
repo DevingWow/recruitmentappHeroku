@@ -1,9 +1,11 @@
 const LoginDAO = require('../integration/LoginDAO')
+const AuthDAO = require('../integration/AuthDAO');
 
 
 class Controller {
     constructor () {
         this.loginDAO = new LoginDAO();
+        this.authDAO = new AuthDAO();
     }
 
     async loginUser(username, password){
@@ -22,13 +24,13 @@ class Controller {
     }
 
     async findUserByEmail(email){
-        return await this.loginDAO.findUserByEmail(email)
+        return await this.loginDAO.findUserByEmail(email);
     }
 
 
     async getUserById (person_id){
         try {
-            return await this.regDAO.findPersonById(person_id);
+            return await this.authDAO.findPersonById(person_id);
         } catch (error) {
             throw error;
         }

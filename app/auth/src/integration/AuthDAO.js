@@ -13,4 +13,19 @@ class AuthDAO {
             throw error;
         }
     }
+
+    createPersonDTO(personModel) {
+        return new PersonDTO(
+            personModel.person_id,
+            personModel.name,
+            personModel.surname,
+            personModel.pnr,
+            personModel.email,
+            personModel.password,
+            personModel.role_id,
+            personModel.username
+        );
+    }
 }
+
+module.exports = AuthDAO;
