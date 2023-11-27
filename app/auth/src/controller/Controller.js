@@ -19,10 +19,10 @@ class Controller {
             throw error;
         }
         if(await this.loginDAO.hasPassword(user)){
-        console.log("In here!")
-        return await this.loginDAO.checkPassword(user, password)
+            console.log("In here!")
+            return await this.loginDAO.checkPassword(user, password)
         } else {
-        return user;
+        
         }
     }
 
