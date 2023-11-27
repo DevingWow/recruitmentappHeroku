@@ -5,7 +5,11 @@ const loginrouter = require('./login');
 const registrationrouter = require('./registration');
 
 const entry = router.get('/', async (req,res) => {
-    res.send('welcome to auth micro!\n');
+    try {
+        res.send('welcome to auth micro!\n');
+    } catch (error) {
+        next(error);
+    }    
 });
 
 

@@ -17,7 +17,7 @@ router.post("/", async (req, res, next) => {
             res.send({login_status: 'fail'});
         }
     } catch (error) {
-        console.error(error);
+        next(error);
     }
 });
 

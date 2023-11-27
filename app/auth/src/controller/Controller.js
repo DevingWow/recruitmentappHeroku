@@ -12,22 +12,34 @@ class Controller {
     }
 
     async loginUser(username, password){
-       const user = await this.loginDAO.findUser(username)
-      
-       if(await this.loginDAO.hasPassword(user)){
+        let user;
+        try{
+            user = await this.loginDAO.findUser(username)
+        } catch (error) {
+            throw error;
+        }
+        if(await this.loginDAO.hasPassword(user)){
         console.log("In here!")
         return await this.loginDAO.checkPassword(user, password)
-       } else {
+        } else {
         return user;
-       }
+        }
     }
 
     async setPassword(personnumber, password) {
-        this.loginDAO.setPassword(personnumber, password)
+        try {
+            this.loginDAO.setPassword(personnumber, password)
+        } catch (error) {
+            throw error;            
+        }
     }
 
     async findUserByEmail(email){
-        return await this.loginDAO.findUserByEmail(email);
+        try {
+            return await this.loginDAO.findUserByEmail(email);
+        } catch (error) {
+            throw error;
+        }
     }
 
 
