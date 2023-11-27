@@ -5,7 +5,7 @@ const bodyparser = require('body-parser');
 const routes = require('./api/routes/index');
 const authMiddleware = require('./api/middleware/auth');
 const cookieparser = require('cookie-parser');
-const errorLogger = require('./api/middleware/loggers').errorLogger;
+const loggers = require('./api/middleware/loggers');
 
 require('dotenv').config({
     path: path.join(APP_ROOT_DIR, '.env')
@@ -17,12 +17,12 @@ const DEFAULT_PORT = '8000';
 const app = express();
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({extended: true}));
-app.use(errorLogger);
 app.use(cookieparser());
 app.use(authMiddleware);
 
 app.use(routes);
 
+app.use(loggers.errorLogger);
 
 db.authenticate().then(e => console.log("db connected!")).catch(err => console.error(err));
 

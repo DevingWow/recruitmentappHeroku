@@ -1,8 +1,10 @@
 const fs = require('fs');
+const path = require('path');
 
 class Logger {
   constructor() {
-    this.logfilepath = '../log.txt';
+    this.logfilepath = path.join(__dirname, '..', 'log.txt');
+    console.log("LOG PATH: " + this.logfilepath);
   }
 
   logToConsole(message){
@@ -12,7 +14,7 @@ class Logger {
   logToFile(message){
     let date = new Date();
     let timestamp = date.getTime();
-    message = datestamp + " " + timestamp + ":\n" + message;
+    message = date + " " + timestamp + ":\n" + message;
     fs.appendFile(this.logfilepath, message, function (err) {
       if (err) throw err;
       console.log('Saved!');

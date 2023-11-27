@@ -3,3 +3,5 @@ node_modules/
 *.env
 
 docker_env_setup.sh
+
+*log.txt
