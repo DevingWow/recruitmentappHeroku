@@ -3,6 +3,7 @@ const router = express.Router();
 
 const loginrouter = require('./login');
 const registrationrouter = require('./registration');
+const logoutrouter = require('./logout');
 
 const entry = router.get('/', async (req,res) => {
     try {
@@ -14,6 +15,7 @@ const entry = router.get('/', async (req,res) => {
 
 
 router.use('/login', loginrouter);
+router.use('/logout', logoutrouter);
 router.use('/register', registrationrouter);
 router.use('/', entry);
 
