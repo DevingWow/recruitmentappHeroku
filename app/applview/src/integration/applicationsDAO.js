@@ -7,6 +7,7 @@ const Person = require('../model/Person')
 const Competence = require('../model/Competence');
 const Competence_profile = require('../model/Competence_profile');
 const Availability = require('../model/Availability');
+const Applicationstatus = require('../model/Applicationstatus');
 
 const sequelize = require('../integration/dbconfig');
 const { ApplicationDTO, ProfileDTO, AvailabilityDTO, competenceDTO } = require('../model/DTO');
@@ -17,6 +18,8 @@ Person.hasMany(Competence_profile, {foreignKey: 'person_id'});
 Competence_profile.belongsTo(Person, {foreignKey: 'person_id'});
 Competence.hasMany(Competence_profile, {foreignKey: 'competence_id'});
 Competence_profile.belongsTo(Competence, {foreignKey: 'competence_id'});
+Person.hasMany(Applicationstatus, {foreignKey: 'person_id'});
+Applicationstatus.belongsTo(Person, {foreignKey: 'person_id'});
 
 
 class ApplicationDAO {
@@ -46,6 +49,55 @@ class ApplicationDAO {
         } catch (error){
             console.log(error);
             throw new Error("Failed to retrieve applications.");
+        }
+    }
+
+    async findApplicationByPNR(pnr) {  
+        try {
+            const foundPerson = await Person.findOne({
+                where: {
+                    pnr: pnr
+                }
+            });
+            const application = await this.findApplicationByPersonID(foundPerson.person_id);
+            return application
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async findApplicationByPersonID(person_id) {
+        try {
+            const application = await Person.findOne({
+                where: {
+                    person_id: person_id
+                },
+                attributes: ['name', 'surname', 'pnr', 'email'], // Selecting specific fields from the Person model
+                include: [
+                    {
+                        model: Availability,
+                        attributes: ['from_date', 'to_date'] // Selecting specific fields from the Availability model
+                    },
+                    {
+                        model: Competence_profile,
+                        attributes: ['years_of_experience'], // Selecting specific fields from the CompetenceProfile model
+                        include: [
+                            {
+                                model: Competence,
+                                attributes: ['name'] // Selecting specific fields from the Competency model
+                            }
+                        ]
+                    }, 
+                    {
+                        model: Applicationstatus,
+                        attributes: ['app_status'] // Selecting specific fields from the Applicationstatus model
+                    }
+                ]
+            });
+            return application;
+        } catch (error) {
+            console.log(error);
+            throw new Error("Failed to retrieve application.");
         }
     }
 
@@ -113,6 +165,7 @@ class ApplicationDAO {
         }
     }
 
+    // NOT USED, NEEDS TO BE UPDATED
     createApplicationDTO(personModel, competence_profile_model, availabilitiesArr) {
         const availabilityModel = availabilitiesArr.map(e => {
             return {from_date: e.from_date, to_date: e.to_date};
