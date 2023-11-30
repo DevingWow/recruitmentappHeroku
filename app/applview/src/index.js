@@ -10,6 +10,7 @@ require('dotenv').config({
 });
 
 const express = require('express');
+const { errorLogger } = require('./api/middleware/loggers');
 const DEFAULT_PORT = '8040';
 const app = express();
 app.use(bodyparser.json());
@@ -17,6 +18,8 @@ app.use(bodyparser.urlencoded({extended: true}));
 app.use(cookieparser());
 
 app.use(routes);
+
+app.use(errorLogger);
 
 db.authenticate().then(e => console.log("db connected!")).catch(err => console.error(err));
 

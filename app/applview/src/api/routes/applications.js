@@ -8,7 +8,7 @@ router.get('/viewMultiple', async (req, res, next) => {
         const applications = await controller.get_applications(nrOfApplications);
         res.send(applications);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -18,7 +18,7 @@ router.get('/view', async (req, res, next) => {
         const application = await controller.get_applicationByPNR(pnr);
         res.send(application);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 

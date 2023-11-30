@@ -48,7 +48,7 @@ class ApplicationDAO {
             return applications;           
         } catch (error){
             console.log(error);
-            throw new Error("Failed to retrieve applications.");
+            throw error;
         }
     }
 
@@ -97,7 +97,7 @@ class ApplicationDAO {
             return application;
         } catch (error) {
             console.log(error);
-            throw new Error("Failed to retrieve application.");
+            throw error;
         }
     }
 

@@ -12,6 +12,6 @@ const entry = router.get('/', async (req,res) => {
 });
 
 router.use('/applications', applicationsrouter);
-router.use('/', entry);
+router.use('/applications', entry);
 
 module.exports = router;
