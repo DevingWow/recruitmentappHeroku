@@ -1,26 +1,25 @@
-class Availability {
+class AvailabilityDTO {
     constructor(from_date, to_date){
         this.from_date = from_date;
         this.to_date = to_date;
     }
 }
 
-class Competency {
+class CompetencyDTO {
     constructor(name){
         this.name = name;
     }
 }
 
-class Competence_profile{
+class Competence_profileDTO{
     constructor(years_of_experience, competency){
         this.years_of_experience = years_of_experience;
-        this.competency = new Competency(competency);
+        this.competency = new CompetencyDTO(competency);
     }
 }
 
-class Person {
-    constructor(username, name, surname, pnr, email){
-        this.username = username;
+class PersonDTO {
+    constructor(name, surname, pnr, email){
         this.name = name;
         this.surname = surname;
         this.pnr = pnr;
@@ -28,7 +27,7 @@ class Person {
     }
 }
 
-class Application{
+class ApplicationDTO{
     constructor(person, availabilities=[], competence_profiles=[]){
         this.person = person;
         this.availabilities = availabilities;
@@ -44,4 +43,4 @@ class Application{
     }
 }
 
-module.exports = { Availability, Competency, Competence_profile, Person, Application}
+module.exports = {AvailabilityDTO, CompetencyDTO, Competence_profileDTO, PersonDTO, ApplicationDTO};
