@@ -2,6 +2,8 @@ const express = require('express');
 const { PersonDTO , Competence_profileDTO, ApplicationDTO, CompetencyDTO, AvailabilityDTO} = require('../model/models');
 const validateApplication = require('../util/validateApplication');
 const Exception = require('../util/Exception');
+const redisAOinstance = require('../redis/redisAO');
+const controller = require('../controller/controller');
 const router = express.Router();
 
 const entry = router.get('/', async (req, res, next) => {
@@ -15,22 +17,16 @@ const entry = router.get('/', async (req, res, next) => {
 const createApplication = router.post('/createApp', async (req, res, next) => {
     try {
         const application = req.body?.application;
-        console.log(application);
+        const token = req.cookies.auth;
+        const MAX_WAIT_TIME = 5000;
+        if(!token){
+            throw new Exception("No auth token in request", "No auth token", 401);
+        }
         if(!application){
             throw new Exception("No application in request body", "No application data", 400);
-        }
-        const person = new PersonDTO(application.name, application.surname, application.pnr, application.email);
-        const competence_profiles = application.competence_profiles.map(c => {
-            return new Competence_profileDTO(c.years_of_experience, c.competency.name);
-        });
-        const availabilities = application.availabilities.map(a =>{
-            return new AvailabilityDTO(a.from_date, a.to_date);
-        });
-        const appDTO = new ApplicationDTO(person, availabilities, competence_profiles);
-        if(!validateApplication(appDTO)){
-            throw new Exception("Invalid application",400);
-        }
-        res.send("Application created");
+        } 
+        const response = await controller.createApplication(application, token, MAX_WAIT_TIME);
+        res.send(response);
     } catch (error) {
         next(new Exception(error.message, "Failed to create application", 400));
     }
