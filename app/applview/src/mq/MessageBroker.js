@@ -66,8 +66,5 @@ function MessageBrokerFactory() {
     return new MQrabbitLocalAdapter();
 }
 
-console.log("RABIT mq url:" +  process.env.RABBITMQ_URL);
 
-const mqInstance = MessageBrokerFactory();
-
-module.exports = mqInstance;
+module.exports = MessageBrokerFactory;

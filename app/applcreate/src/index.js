@@ -8,9 +8,13 @@ require('dotenv').config({
     path: path.join(APP_ROOT_DIR, '.env') 
 });
 
+
+
 const express = require('express');
 const { errorLogger } = require('./middleware/loggers');
 const errorHandler = require('./middleware/errorhandler');
+const mqInstance = require('./mq/MessageBroker');
+mqInstance.connect();
 const DEFAULT_PORT = 8060;
 const args = process.argv.slice(2);
 const app = express();
