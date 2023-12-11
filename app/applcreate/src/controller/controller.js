@@ -1,12 +1,10 @@
-const redisAO = require("../redis/redisAO");
 const { PersonDTO , Competence_profileDTO, ApplicationDTO, CompetencyDTO, AvailabilityDTO} = require('../model/models');
+const mqInstance = require('../mq/MessageBroker');
 const Exception = require('../util/Exception');
 const validateApplication = require('../util/validateApplication');
 
 class Controller {
     constructor() {
-        this.redisAOinstance = new redisAO();
-        this.redisAOinstance.init();
     }
 
     async createApplication(application, token, maxWait){
@@ -22,16 +20,12 @@ class Controller {
             if(!validateApplication(appDTO)){
                 throw new Exception("Invalid application",400);
             }
-
-            await this.redisAOinstance.publishPayload(application, token);
-            const status = await this.redisAOinstance.waitConfirmation(token, maxWait);
-            if(status === 'OK'){
-                return "Application created";
-            } else if(status === 'pending') {
-                throw new Exception('Application creation timed out after ' + MAX_WAIT_TIME + 'ms', 'Application might not have been saved, try again' , 408);
-            } else {
-                throw new Exception('Application creation failed', 'Application creation failed , 500');
+            const wrappedApplication = {token:token, application: application};
+            const confirmation =  await mqInstance.sendMessage(JSON.stringify(wrappedApplication));
+            if(confirmation.status !== 'OK'){
+                throw new Exception("Could not send application",500);
             }
+            return "application created";
         } catch (error) {
             throw error;
         }

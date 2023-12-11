@@ -1,8 +1,5 @@
 const express = require('express');
-const { PersonDTO , Competence_profileDTO, ApplicationDTO, CompetencyDTO, AvailabilityDTO} = require('../model/models');
-const validateApplication = require('../util/validateApplication');
 const Exception = require('../util/Exception');
-const redisAOinstance = require('../redis/redisAO');
 const controller = require('../controller/controller');
 const router = express.Router();
 
