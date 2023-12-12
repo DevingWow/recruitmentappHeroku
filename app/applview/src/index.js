@@ -11,14 +11,12 @@ require('dotenv').config({
 
 const express = require('express');
 const { errorLogger } = require('./api/middleware/loggers');
-const initMQ = require('./mq/mqHandler');
 const DEFAULT_PORT = '8040';
 const app = express();
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({extended: true}));
 app.use(cookieparser());
 
-initMQ();
 
 app.use(routes);
 

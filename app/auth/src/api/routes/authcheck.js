@@ -20,6 +20,17 @@ router.get('/',async (req, res, next) => {
             return;
         }
 
+        if(originalUri.startsWith('/createApp')){
+            const user = req.auth;
+            if (user?.role_id === APPLICANT){
+                res.status(200).send({auth_status: 'Authorized'});
+            }
+            else {
+                res.status(401).send({auth_status: 'Unauthorized'});
+            }
+            return;
+        }
+
         if (req.auth){
             res.status(200).send({auth_status: 'Authorized'});
         } else {

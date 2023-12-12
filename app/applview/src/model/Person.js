@@ -28,6 +28,11 @@ const Person = sequelize.define("persons", {
             type: Sequelize.STRING,
            
            
+        },
+        external_person_id: {
+            type: Sequelize.INTEGER,
+           
+           
         }
 });
 

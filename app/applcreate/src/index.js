@@ -13,9 +13,6 @@ require('dotenv').config({
 const express = require('express');
 const { errorLogger } = require('./middleware/loggers');
 const errorHandler = require('./middleware/errorhandler');
-const mqInstance = require('./mq/MessageBroker');
-mqInstance.connect();
-const DEFAULT_PORT = 8060;
 const args = process.argv.slice(2);
 const app = express();
 app.use(bodyparser.json());
@@ -27,7 +24,7 @@ app.use(routes);
 
 app.use(errorLogger);
 app.use(errorHandler);
-
+const DEFAULT_PORT = '8040';
 const port = process.env.PORT || args[0] || DEFAULT_PORT;
 
 const server = app.listen(port, () => {

@@ -11,6 +11,8 @@ const Applicationstatus = require('../model/Applicationstatus');
 
 const sequelize = require('../integration/dbconfig');
 const { ApplicationDTO, ProfileDTO, AvailabilityDTO, competenceDTO } = require('../model/DTO');
+const Transactor = require('./Transactor');
+const logger = require('../util/Logger');
 
 Person.hasMany(Availability, {foreignKey: 'person_id'});
 Availability.belongsTo(Person, {foreignKey: 'person_id'});
@@ -47,9 +49,13 @@ class ApplicationDAO {
             });
             return applications;           
         } catch (error){
-            console.log(error);
+            this.#logError(error);
             throw error;
         }
+    }
+
+    #logError(error){
+        logger.log("[LOGGER]: "+error.stacktrace);
     }
 
     async findApplicationByPNR(pnr) {  
@@ -62,17 +68,122 @@ class ApplicationDAO {
             const application = await this.findApplicationByPersonID(foundPerson.person_id);
             return application
         } catch (error) {
+            this.#logError(error);
             throw error;
         }
     }
 
-    async findApplicationByPersonID(person_id) {
+ 
+    async updateApplication(application, person_id) {
+        const transactor = new Transactor();
+        try {
+            await transactor.startTransaction();
+            const person = await Person.findOne({
+                where: {
+                    person_id: person_id
+                }
+            });
+            const availabilities = await Availability.findAll({
+                where: {
+                    person_id: person_id
+                }
+            });
+            const competencies = await Competence_profile.findAll({
+                where: {
+                    person_id: person_id
+                }
+            });
+            const allCompetencies = await Competence.findAll();
+            const compMap = allCompetencies.reduce((map, e) => {
+                map[e.competence_id] = e.name;
+                return map;
+            })
+            const filteredAvailabilities = application.availabilities.filter(availability => {
+                return !availabilities.some(existingAvailability => {
+                    return availability.from_date === existingAvailability.from_date && availability.to_date === existingAvailability.to_date;
+                });
+            });
+            const filteredCompetencies = application.competence_profiles.filter(competency => {
+                const foundInAllCompetencies = allCompetencies.some(allCompetency => {
+                    return competency.competency.name === compMap[allCompetency.competence_id];
+                });
+                const foundInExistingCompetencies = competencies.some(existingCompetency => {
+                    return competency.competency.name === compMap[existingCompetency.competence_id];
+                });
+
+                return foundInAllCompetencies && !foundInExistingCompetencies;
+            });
+            for (const availability of filteredAvailabilities) {
+                await Availability.create({
+                    person_id: person_id,
+                    from_date: availability.from_date,
+                    to_date: availability.to_date
+                });
+            }
+            for (const competency of filteredCompetencies) {
+                const competence = await Competence.findOne({
+                    where: {
+                        name: competency.competency.name
+                    }
+                });
+                await Competence_profile.create({
+                    person_id: person_id,
+                    competence_id: competence.competence_id,
+                    years_of_experience: competency.years_of_experience
+                });
+            }
+            await transactor.commit();
+        } catch (error) {
+            this.#logError(error);
+            await transactor.rollback();
+            throw error;
+        }
+    }
+
+    async insertNewApplication(application, external_person_id) {
+        const transactor = new Transactor();
+        try {
+            await transactor.startTransaction();
+            const person = await Person.create({
+                name: application.name,
+                surname: application.surname,
+                pnr: application.pnr,
+                email: application.email,
+                external_person_id: external_person_id
+            });
+            for (const availability of application.availabilities) {
+                await Availability.create({
+                    person_id: person.person_id,
+                    from_date: availability.from_date,
+                    to_date: availability.to_date
+                });
+            }
+            for (const competence_profile of application.competence_profiles) {
+                const competence = await Competence.findOne({
+                    where: {
+                        name: competence_profile.competency.name
+                    }
+                });
+                await Competence_profile.create({
+                    person_id: person.person_id,
+                    competence_id: competence.competence_id,
+                    years_of_experience: competence_profile.years_of_experience
+                });
+            }
+            await transactor.commit();
+        } catch (error) {
+            await transactor.rollback();
+            throw error;
+        }
+    }
+
+    async findApplicationByIDS(id_type, id) {
         try {
             const application = await Person.findOne({
                 where: {
-                    person_id: person_id
+                    [id_type]: id
                 },
-                attributes: ['name', 'surname', 'pnr', 'email'], // Selecting specific fields from the Person model
+                attributes: ['person_id','name', 'surname', 'pnr', 'email'], // Selecting specific fields from the Person model
                 include: [
                     {
                         model: Availability,
@@ -97,6 +208,22 @@ class ApplicationDAO {
             return application;
         } catch (error) {
             console.log(error);
+            throw error;
+        }
+    }
+
+    async findApplicationByPersonID(person_id) {
+        try {
+            return await this.findApplicationByIDS('person_id', person_id);
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async findApplicationByExternalID(external_person_id) {
+        try {
+            return await this.findApplicationByIDS('external_person_id', external_person_id);
+        } catch (error) {
             throw error;
         }
     }

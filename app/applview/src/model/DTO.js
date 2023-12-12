@@ -1,12 +1,3 @@
-class ApplicationDTO {
-    constructor (fullname, pnr,  email, competences, availabilies){
-        this.fullname = fullname;
-        this.pnr = pnr;
-        this.email = email;
-        this.availabilies = availabilies; // filtered DTOs
-        this.competences = competences; // filtered DTO comibnations
-    }
-}
 
 
 class AvailabilityDTO {
@@ -43,6 +34,20 @@ class competenceDTO {
         this.name = name;
     }
 }
+
+
+class ApplicationDTO {
+    constructor (person_id, name, surname, pnr, email, availabilies, competence_profiles){
+        this.person_id = person_id;
+        this.name = name;
+        this.surname = surname;
+        this.pnr = pnr;
+        this.email = email;
+        this.availabilities = availabilies;
+        this.competence_profiles = competence_profiles;
+    }
+}
+
 
 module.exports = { ApplicationDTO, AvailabilityDTO, PersonDTO, ProfileDTO, competenceDTO };
 

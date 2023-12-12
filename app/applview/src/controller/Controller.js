@@ -1,61 +1,47 @@
+const path = require('path');
+const APP_ROOT_DIR = path.join(__dirname, '..');
+require('dotenv').config({
+    path: path.join(APP_ROOT_DIR, '.env')
+});
+
 const ApplicationDAO = require('../integration/applicationsDAO');
-const Transactor = require('../integration/Transactor');
+const decryptToken = require('../util/tokenHandler');
+const logger = require('../util/Logger');
+const MessageBrokerFactory = require('../mq/MessageBroker');
+const initMQ = require('../mq/mqHandler');
 
 class Controller {
     constructor(){
         this.appDAO = new ApplicationDAO();
+        this.messageBroker = MessageBrokerFactory();
     }
 
-    async updateApplication(person_id, availabilities, competencies) {
-        const status = { success: false, msg: 'failed to update application' };
+    async initMessageBroker(){
+        await initMQ(this.messageBroker, this.processMQdata.bind(this));
+    }
 
-        if (availabilities.length === 0 && competencies.length === 0) {
-            return status;
-        }
-
-        const transactor = new Transactor();
-
+    async processMQdata(data){
         try {
-            await transactor.startTransaction();
-
-            const existingAvailabilities = await this.appDAO.availabilitiesByPersonId(person_id);
-            const existingCompetencies = await this.appDAO.competencyByPersonId(person_id);
-            const allCompetencies = await this.get_competencies();
-
-            const filteredAvailabilities = availabilities.filter(availability => {
-                return !existingAvailabilities.some(existingAvailability => {
-                    return availability.from === existingAvailability.from_date && availability.to === existingAvailability.to_date;
-                });
-            });
-
-            const filteredCompetencies = competencies.filter(competency => {
-                const foundInAllCompetencies = allCompetencies.some(allCompetency => {
-                    return parseInt(competency.competency.id) === allCompetency.id;
-                });
-
-                const foundInExistingCompetencies = existingCompetencies.some(existingCompetency => {
-                    return parseInt(competency.competency.id) === existingCompetency.competence_id;
-                });
-
-                return foundInAllCompetencies && !foundInExistingCompetencies;
-            });
-
-            for (const availability of filteredAvailabilities) {
-                await this.appDAO.insertAvailability(person_id, availability.from, availability.to);
+            const decToken = decryptToken(data.token);
+            if (!decToken) throw new Error('Invalid token');
+            const external_person_id = decToken.person_id;
+            const application = data.application;
+            console.log("APPLICATION: ", application, "PERSON ID: ", external_person_id);
+            if(!application || !external_person_id) throw new Error('Invalid application or ext id');
+            const foundByPersonID = await this.appDAO.findApplicationByExternalID(external_person_id);
+            console.log("FOUND BY PERSON ID: ", foundByPersonID);
+            if (!foundByPersonID){
+                console.log("INSERTING NEW APPLICATION");
+                 await this.appDAO.insertNewApplication(application, external_person_id);
             }
-
-            for (const competency of filteredCompetencies) {
-                await this.appDAO.insertCompetency(person_id, competency.competency.id, competency.experience);
+            else {
+                console.log("UPDATING APPLICATION");
+                await this.appDAO.updateApplication(application, foundByPersonID.person_id);
             }
-
-            await transactor.commit();
-            status.success = true;
-            status.msg = 'application updated successfully';
+            console.log("ACKING MESSAGE");
+            return true;
         } catch (error) {
-            await transactor.rollback();
             throw error;
-        } finally {
-            return status;
         }
     }
 
@@ -87,5 +73,7 @@ class Controller {
 
 const controller = new Controller();
 Object.freeze(controller);
+
+controller.initMessageBroker();
 
 module.exports = controller;

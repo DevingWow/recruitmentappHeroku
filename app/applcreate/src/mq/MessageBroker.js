@@ -1,4 +1,8 @@
-
+const path = require('path');
+const APP_ROOT_DIR = path.resolve(__dirname, '../..');
+require('dotenv').config({
+    path: path.join(APP_ROOT_DIR, '.env') 
+});
 
 class MessageBroker {
     async connect() {}
@@ -19,6 +23,7 @@ class MQrabbitLocalAdapter extends MessageBroker {
     
     async connect() {
         try {
+            console.log("RABBITMQ: " ,JSON.stringify(process.env.RABBITMQ_URL));
             this.connection = await amqp.connect(process.env.RABBITMQ_URL);
             this.channel = await this.connection.createConfirmChannel();
             await this.channel.assertQueue(this.QUEUE, { durable: this.durability });
@@ -66,8 +71,7 @@ function MessageBrokerFactory() {
     return new MQrabbitLocalAdapter();
 }
 
-console.log("RABIT mq url:" +  process.env.RABBITMQ_URL);
-
-const mqInstance = MessageBrokerFactory();
+mqInstance = MessageBrokerFactory();
+mqInstance.connect();
 
 module.exports = mqInstance;
