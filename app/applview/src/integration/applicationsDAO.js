@@ -177,13 +177,13 @@ class ApplicationDAO {
         }
     }
 
-    async findApplicationByIDS(id_type, id) {
+    async findApplicationByIDS(id_type, id, attributes) {
         try {
             const application = await Person.findOne({
                 where: {
                     [id_type]: id
                 },
-                attributes: ['person_id','name', 'surname', 'pnr', 'email'], // Selecting specific fields from the Person model
+                attributes: attributes, // Selecting specific fields from the Person model
                 include: [
                     {
                         model: Availability,
@@ -214,7 +214,8 @@ class ApplicationDAO {
 
     async findApplicationByPersonID(person_id) {
         try {
-            return await this.findApplicationByIDS('person_id', person_id);
+            const attributes = ['name', 'surname', 'pnr', 'email'];
+            return await this.findApplicationByIDS('person_id', person_id, attributes);
         } catch (error) {
             throw error;
         }
@@ -222,7 +223,8 @@ class ApplicationDAO {
 
     async findApplicationByExternalID(external_person_id) {
         try {
-            return await this.findApplicationByIDS('external_person_id', external_person_id);
+            const attributes = ['person_id','name', 'surname', 'pnr', 'email'];
+            return await this.findApplicationByIDS('external_person_id', external_person_id, attributes);
         } catch (error) {
             throw error;
         }

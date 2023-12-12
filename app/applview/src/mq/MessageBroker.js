@@ -5,6 +5,7 @@ class MessageBroker {
     async sendMessage(topic, message) {}
     async receiveMessage(topic) {}   
     async ackMessage(msg) {}
+    async nackMessage(msg) {}
 }
 
 const amqp = require('amqplib');
@@ -49,6 +50,10 @@ class MQrabbitLocalAdapter extends MessageBroker {
 
     async ackMessage(msg) { 
         this.channel.ack(msg);
+    }
+
+    async nackMessage(msg) {
+        this.channel.nack(msg);
     }
 
     async receiveMessage(callback) {

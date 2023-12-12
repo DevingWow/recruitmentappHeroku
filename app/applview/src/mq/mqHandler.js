@@ -6,7 +6,10 @@ async function receiveMessages(mqInstance, msgcallback) {
     try {
         await mqInstance.receiveMessage(async (msg) => {
             const message = JSON.parse(msg.content.toString());
-            if (message === null) logger.log("[ERROR Reiceive Message]: " + "Message is null");
+            if (message === null || message === undefined){
+                mqInstance.nackMessage(msg); 
+                logger.log("[ERROR Reiceive Message]: " + "Message is null");
+            }
             mqInstance.ackMessage(msg);
             logger.log("[Recieved Message]: " + msg.content.toString());
             await msgcallback(message);
