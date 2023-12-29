@@ -8,19 +8,18 @@ class MessageBroker {
     async nackMessage(msg) {}
 }
 
-const amqp = require('amqplib');
-
 class MQrabbitLocalAdapter extends MessageBroker {
     
     constructor() {
         super();
+        this.amqp = require('amqplib');
         this.QUEUE = process.env.LOCAL_QUEUE||'local_queue';
         this.durability = process.env.LOCAL_DURABILITY||false;
     }
     
     async connect() {
         try {
-            this.connection = await amqp.connect(process.env.RABBITMQ_URL);
+            this.connection = await this.amqp.connect(process.env.RABBITMQ_URL);
             this.channel = await this.connection.createConfirmChannel();
             await this.channel.assertQueue(this.QUEUE, { durable: this.durability });
         } catch (error) {
@@ -61,6 +60,36 @@ class MQrabbitLocalAdapter extends MessageBroker {
             await this.channel.consume(this.QUEUE, (msg)=> {
                 callback(msg);
             });
+        } catch (error) {
+            throw error;
+        }
+    }
+}
+
+
+
+class HerokukafkaAdapter extends MessageBroker {
+    constructor(){
+        super();
+        this.kafka = require('node-rdkafka');
+        this.topic = process.env.KAFKA_TOPIC||'local_queue';
+    }
+
+    async connect(){
+        try {
+            if(process.env.KAFKA_PRODUCER_FLAG === 'true'){
+                const producer_config = {
+                    'metadata.broker.list': process.env.KAFKA_URL,
+                    'security.protocol': 'ssl',
+                    'ssl.certificate.location': process.env.KAFKA_CERT,
+                    'ssl.key.location': process.env.KAFKA_KEY,
+                    'ssl.ca.location': process.env.KAFKA_CA,
+                    'dr_cb': true
+                };
+                this.producer = new this.kafka.Producer(producer_config);
+                this.producer.connect();
+            }
+            
         } catch (error) {
             throw error;
         }

@@ -13,7 +13,8 @@ NETWORK_NAME='micro-network'
 docker rm -f $RABBITMQ_NAME
 docker run -d --hostname $RABBITMQ_HOSTNAME --name $RABBITMQ_NAME --network $NETWORK_NAME -p $RABBITMQ_HOST_PORT:$RABBITMQ_CONTAINER_PORT rabbitmq:3-management
 
-sleep 1
+echo "sleeping 10 seconds"
+sleep 10
 
 NGINX_IMAGE='app/gateway/'
 MICROAUTH_IMAGE='app/auth/'

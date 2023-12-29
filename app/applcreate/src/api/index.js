@@ -29,7 +29,15 @@ const createApplication = router.post('/createApp', async (req, res, next) => {
     }
 });
 
+
+
 router.use('/', entry);
 router.use('/', createApplication);
+
+const catchAll = router.all('*', async (req, res) => {
+    res.status(404).send('404 not found');
+});
+
+router.use('/', catchAll);
 
 module.exports = router;
