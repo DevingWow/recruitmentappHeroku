@@ -7,8 +7,7 @@ require('dotenv').config({
 const ApplicationDAO = require('../integration/applicationsDAO');
 const decryptToken = require('../util/tokenHandler');
 const logger = require('../util/Logger');
-const MessageBrokerFactory = require('../mq/MessageBroker');
-const initMQ = require('../mq/mqHandler');
+const {initMQ, MessageBrokerFactory} = require('../mq/mqHandler')
 
 class Controller {
     constructor(){

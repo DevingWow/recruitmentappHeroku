@@ -1,10 +1,21 @@
 const { PersonDTO , Competence_profileDTO, ApplicationDTO, CompetencyDTO, AvailabilityDTO} = require('../model/models');
-const mqInstance = require('../mq/MessageBroker');
+const MessageBrokerFactory = require('../mq/mqHandler');
+const MessageBroker = require('../mq/MessageBroker');
 const Exception = require('../util/Exception');
 const validateApplication = require('../util/validateApplication');
+const logger = require('../util/Logger');
 
 class Controller {
     constructor() {
+            this.mqInstance = MessageBrokerFactory();
+    }
+
+    async connectMQ(){
+        try { 
+            await this.mqInstance.connect();
+        } catch (error) {
+           throw error; 
+        }
     }
 
     async createApplication(application, token, maxWait){
@@ -21,7 +32,7 @@ class Controller {
                 throw new Exception("Invalid application",400);
             }
             const wrappedApplication = {token:token, application: application};
-            const confirmation =  await mqInstance.sendMessage(JSON.stringify(wrappedApplication));
+            const confirmation =  await this.mqInstance.sendMessage(JSON.stringify(wrappedApplication));
             if(confirmation.status !== 'OK'){
                 throw new Exception("Could not send application",500);
             }
